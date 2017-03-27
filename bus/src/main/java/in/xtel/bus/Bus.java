@@ -98,9 +98,8 @@ public class Bus {
         if (subscribers.contains(subscriber)) {
             try {
                 method.invoke(subscriber, event);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                Log.e(TAG, "Failed to invoke subscriber method");
                 e.printStackTrace();
             }
         }
