@@ -4,7 +4,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
@@ -69,7 +68,7 @@ public class Bus {
                 }
             }
             if (toBeInvoked != null) {
-                subscriptions.add(new Subscription(subscriber, toBeInvoked, null));
+                subscriptions.add(new Subscription(subscriber, toBeInvoked));
             } else {
                 Log.e(TAG, "No subscribers registered for this event");
             }
@@ -81,16 +80,23 @@ public class Bus {
 
     private void postEventOnMethod(final Method method, final Object subscriber, final Object event) {
         Subscribe a = method.getAnnotation(Subscribe.class);
-        if (a != null && a.value() == ThreadMode.UI_THREAD) {
-            Handler mHandler = new Handler(Looper.getMainLooper());
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
+        if (a != null) {
+            switch (a.value()) {
+                case UI_THREAD:
+                    Handler mHandler = new Handler(Looper.getMainLooper());
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            invokeMethod(method, subscriber, event);
+                        }
+                    });
+                    break;
+                case POSTING:
                     invokeMethod(method, subscriber, event);
-                }
-            });
+                    break;
+            }
         } else {
-            invokeMethod(method, subscriber, event);
+            Log.e(TAG, "Methods should be annotated with 'Subscribe' for callbacks");
         }
     }
 
@@ -98,7 +104,7 @@ public class Bus {
         if (subscribers.contains(subscriber)) {
             try {
                 method.invoke(subscriber, event);
-            } catch (IllegalAccessException | InvocationTargetException e) {
+            } catch (Exception e) {
                 Log.e(TAG, "Failed to invoke subscriber method");
                 e.printStackTrace();
             }

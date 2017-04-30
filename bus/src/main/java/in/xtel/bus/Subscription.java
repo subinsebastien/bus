@@ -8,12 +8,10 @@ import java.lang.reflect.Method;
 public class Subscription {
     Object subscriber;
     Method method;
-    ThreadMode threadMode;
 
-    public Subscription(Object subscriber, Method method, ThreadMode threadMode) {
+    public Subscription(Object subscriber, Method method) {
         this.subscriber = subscriber;
         this.method = method;
-        this.threadMode = threadMode;
     }
 
     public Object getSubscriber() {
@@ -22,9 +20,5 @@ public class Subscription {
 
     public Method getMethod() {
         return method;
-    }
-
-    public ThreadMode getThreadMode() {
-        return threadMode;
     }
 }
