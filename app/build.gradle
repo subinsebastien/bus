@@ -5,7 +5,7 @@ android {
     buildToolsVersion "25.0.2"
     defaultConfig {
         applicationId "in.xtel.busandroid"
-        minSdkVersion 19
+        minSdkVersion 16
         targetSdkVersion 25
         versionCode 1
         versionName "1.0.0"
@@ -28,4 +28,5 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     testCompile 'junit:junit:4.12'
     compile project(':bus')
+    compile 'org.greenrobot:eventbus:3.0.0'
 }

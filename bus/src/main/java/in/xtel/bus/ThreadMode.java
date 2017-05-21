@@ -6,6 +6,5 @@ package in.xtel.bus;
 public enum ThreadMode {
     UI_THREAD, POSTING;
 
-    private ThreadMode() {
-    }
+    ThreadMode() {}
 }

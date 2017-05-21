@@ -24,4 +24,14 @@
         android:text="Button"
         tools:layout_editor_absoluteX="280dp"
         tools:layout_editor_absoluteY="144dp" />
+
+
+    <TextView
+        android:id="@+id/textView"
+        android:text="Hello Aliasing"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:layout_editor_absoluteY="120dp"
+        tools:layout_editor_absoluteX="16dp" />
+
 </android.support.constraint.ConstraintLayout>

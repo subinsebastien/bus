@@ -16,7 +16,6 @@ public class Bus {
 
     private static final String TAG = Bus.class.getSimpleName();
     private static Bus instance;
-
     private ArrayList<Object> subscribers;
 
     private Bus() {
@@ -56,47 +55,51 @@ public class Bus {
 
     private void postEvent(Object event) throws Exception {
         ArrayList<Subscription> subscriptions = new ArrayList<>();
+
         for (Object subscriber : subscribers) {
-            Method toBeInvoked = null;
+            Subscription subscription = new Subscription(subscriber);
             Method[] methods = subscriber.getClass().getDeclaredMethods();
             for (Method m : methods) {
-                Class<?>[] parameterTypes = m.getParameterTypes();
-                if (parameterTypes.length == 1) {
-                    if (parameterTypes[0].equals(event.getClass())) {
-                        toBeInvoked = m;
+                if (m.getAnnotation(Subscribe.class) != null) {
+                    Class<?>[] parameterTypes = m.getParameterTypes();
+                    if (parameterTypes.length == 1) {
+                        if (parameterTypes[0].equals(event.getClass())) {
+                            subscription.addMethod(m);
+                        }
                     }
                 }
             }
-            if (toBeInvoked != null) {
-                subscriptions.add(new Subscription(subscriber, toBeInvoked));
-            } else {
-                Log.e(TAG, "No subscribers registered for this event");
+
+            if (!subscription.getMethods().isEmpty()) {
+                subscriptions.add(subscription);
             }
         }
-        for (Subscription subscription : subscriptions) {
-            postEventOnMethod(subscription.getMethod(), subscription.getSubscriber(), event);
+
+        if (!subscriptions.isEmpty()) {
+            for (Subscription subscription : subscriptions) {
+                for (Method method : subscription.getMethods()) {
+                    postEventOnMethod(method, subscription.getSubscriber(), event);
+                }
+            }
+        } else {
+            Log.e(TAG, "No subscribers registered for this event");
         }
     }
 
     private void postEventOnMethod(final Method method, final Object subscriber, final Object event) {
-        Subscribe a = method.getAnnotation(Subscribe.class);
-        if (a != null) {
-            switch (a.value()) {
-                case UI_THREAD:
-                    Handler mHandler = new Handler(Looper.getMainLooper());
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            invokeMethod(method, subscriber, event);
-                        }
-                    });
-                    break;
-                case POSTING:
-                    invokeMethod(method, subscriber, event);
-                    break;
-            }
-        } else {
-            Log.e(TAG, "Methods should be annotated with 'Subscribe' for callbacks");
+        switch (method.getAnnotation(Subscribe.class).value()) {
+            case UI_THREAD:
+                Handler mHandler = new Handler(Looper.getMainLooper());
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        invokeMethod(method, subscriber, event);
+                    }
+                });
+                break;
+            case POSTING:
+                invokeMethod(method, subscriber, event);
+                break;
         }
     }
 
@@ -105,7 +108,7 @@ public class Bus {
             try {
                 method.invoke(subscriber, event);
             } catch (Exception e) {
-                Log.e(TAG, "Failed to invoke subscriber method");
+                Log.e(TAG, "Failed to invoke subscriber method " + method.getName());
                 e.printStackTrace();
             }
         }

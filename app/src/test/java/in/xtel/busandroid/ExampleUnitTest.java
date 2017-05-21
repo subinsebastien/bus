@@ -2,7 +2,7 @@ package in.xtel.busandroid;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import java.util.ArrayList;
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -12,6 +12,10 @@ import static org.junit.Assert.*;
 public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() throws Exception {
-        assertEquals(4, 2 + 2);
+
+        ArrayList<String> arrayList = new ArrayList<>();
+
+        System.out.println(new ArrayList<String>().getClass());
+
     }
 }
